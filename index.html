@@ -6,6 +6,7 @@
     <title>DRM – Eksperyment Fałszywych Wspomnień</title>
     
     <style>
+        /* Główne style */
         body { 
             font-family: Arial, sans-serif; 
             text-align: center; 
@@ -13,18 +14,7 @@
             max-width: 800px;
             margin: 0 auto;
         }
-        h1 {
-            color: #2c3e50;
-        }
-        #list { 
-            font-size: 24px; 
-            margin: 30px 0; 
-            color: darkblue; 
-            min-height: 50px; /* Utrzymanie przestrzeni */
-            padding: 10px;
-            border: 1px solid #ccc;
-            background-color: #f4f4f4;
-        }
+        h1 { color: #2c3e50; }
         button { 
             padding: 12px 25px; 
             margin: 10px; 
@@ -36,64 +26,107 @@
             border-radius: 5px;
             transition: background-color 0.3s;
         }
-        button:hover:not(:disabled) {
-            background-color: #2980b9;
-        }
-        button:disabled {
-            background-color: #bdc3c7;
-            cursor: not-allowed;
-        }
+        button:hover:not(:disabled) { background-color: #2980b9; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
         #results {
             margin-top: 30px;
             font-size: 18px;
             font-weight: bold;
-            color: #e74c3c;
+        }
+        
+        /* Style dla ekranu Nauki (Ekran 1) */
+        #learning-phase {
+            padding: 20px;
+            border: 2px solid #3498db;
+            margin-bottom: 20px;
+        }
+        #list { 
+            font-size: 28px; 
+            margin: 20px 0; 
+            color: darkblue; 
+            min-height: 50px; 
+            font-weight: bold;
+        }
+
+        /* Style dla ekranu Testu (Ekran 2) */
+        #recall-phase {
+            padding: 20px;
+            border: 2px solid #e74c3c;
+            display: none; /* Domyślnie ukryty */
+        }
+        #recall-input {
+            width: 90%;
+            height: 100px;
+            padding: 10px;
+            margin: 15px 0;
+            font-size: 16px;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
     <h1>Eksperyment DRM</h1>
-    <p>Zapamiętaj słowa, które zobaczysz. Potem spróbuj je przypomnieć.</p>
     
-    <div id="list">--- Naciśnij START, aby rozpocząć ---</div>
-    
-    <button id="startButton">Start (Pokaż słowa)</button>
-    <button id="testButton">Test przypominania</button>
+    <div id="learning-phase">
+        <p>Zapamiętaj słowa, które zobaczysz poniżej, a następnie przejdź do testu.</p>
+        <div id="list">--- Naciśnij START, aby rozpocząć ---</div>
+        
+        <button id="startButton">Start (Pokaż słowa)</button>
+        <button id="goToTestButton" disabled>Przejdź do testu</button>
+    </div>
+
+    <div id="recall-phase">
+        <h2>Test Przypominania</h2>
+        <p>Wpisz poniżej **tylko** słowa, które pamiętasz, oddzielając je przecinkami. Nie możesz już podglądać listy!</p>
+        <textarea id="recall-input" placeholder="np. poduszka, budzik, sen"></textarea>
+        <br>
+        <button id="submitTestButton">Sprawdź wyniki</button>
+    </div>
     
     <div id="results"></div>
 
     <script>
         // Dane eksperymentu
         const words = ["łóżko", "noc", "poduszka", "drzemka", "marzenie", "zmęczenie", "zasnąć", "kołdra", "budzik", "odpoczynek", "sypialnia", "koszmar", "relaks"];
-        const lure = "sen"; // słowo-klucz, którego nie pokażemy (Critical Lure)
+        const lure = "sen"; // Critical Lure
         let shown = false;
 
         // Pobieranie elementów DOM
         const listDiv = document.getElementById("list");
         const resultsDiv = document.getElementById("results");
+        const learningPhase = document.getElementById("learning-phase");
+        const recallPhase = document.getElementById("recall-phase");
         const startButton = document.getElementById("startButton");
-        const testButton = document.getElementById("testButton");
+        const goToTestButton = document.getElementById("goToTestButton");
+        const recallInput = document.getElementById("recall-input");
+        const submitTestButton = document.getElementById("submitTestButton");
 
-        // 1. Funkcja do wyświetlania listy
+        // --- FUNKCJE NAWIGACJI ---
+
+        // 1. Pokaż listę słów
         function showList() {
             listDiv.innerHTML = words.join(", ");
             shown = true;
-            resultsDiv.innerHTML = "Lista została pokazana. Masz kilka sekund na zapamiętanie!";
-            startButton.disabled = true; // Dezaktywuj przycisk po starcie
+            resultsDiv.innerHTML = "Lista pokazana. Zapamiętaj. Następnie przejdź do testu.";
+            startButton.disabled = true;
+            goToTestButton.disabled = false;
+        }
+        
+        // 2. Przełącz na ekran testu i ukryj listę
+        function goToTest() {
+            if (!shown) return alert("Najpierw naciśnij START!");
+            
+            learningPhase.style.display = 'none'; // Ukrywamy ekran nauki
+            recallPhase.style.display = 'block'; // Pokazujemy ekran testu
+            resultsDiv.innerHTML = ''; // Czyścimy komunikat
         }
 
-        // 2. Funkcja do testu przypominania
-        function testRecall() {
-            if (!shown) {
-                alert("Najpierw naciśnij START, aby zobaczyć listę!");
-                return;
-            }
+        // 3. Sprawdzenie wyników
+        function submitTest() {
+            let recall = recallInput.value;
             
-            // Prośba o wpisanie słów
-            let recall = prompt("Wpisz słowa, które pamiętasz (oddziel przecinkami, np. kołdra, noc, sen):");
-            
-            if (recall === null || recall.trim() === "") {
-                resultsDiv.innerHTML = "Anulowano lub nie wpisano żadnych słów.";
+            if (recall.trim() === "") {
+                resultsDiv.innerHTML = "Nie wpisano żadnych słów. Wpisz je i spróbuj ponownie.";
                 return;
             }
             
@@ -103,20 +136,36 @@
                                         .filter(item => item.length > 0);
             
             let lureFound = arr.includes(lure);
+            let correctRecalled = 0;
             
+            // Liczenie poprawnie przypomnianych słów (opcjonalnie)
+            arr.forEach(item => {
+                if (words.includes(item)) {
+                    correctRecalled++;
+                }
+            });
+
             // Wyświetlenie wyników
+            resultsDiv.style.color = lureFound ? '#e74c3c' : '#27ae60';
             resultsDiv.innerHTML =
-                `Zapamiętałeś: **${arr.length}** słów.<br>` +
+                `<h2>Twój Wynik</h2>` +
+                `Poprawnie zapamiętane słowa: **${correctRecalled} / ${words.length}**<br>` +
+                `Słów ogółem (poprawne + fałszywe): **${arr.length}**<br><br>` +
                 (lureFound 
                     ? "🚨 **FAŁSZYWE WSPOMNIENIE! Wpisałeś słowo 'sen', którego NIE BYŁO!**" 
                     : "✅ Nie wpisałeś słowa 'sen'.");
                 
-            testButton.disabled = true; // Test przeprowadzony
+            submitTestButton.disabled = true; // Test przeprowadzony
+            
+            // Opcjonalnie: Powrót do ekranu nauki
+            learningPhase.style.display = 'block';
+            goToTestButton.disabled = true;
         }
 
-        // Podpięcie zdarzeń do przycisków
+        // --- PODPIĘCIE ZDARZEŃ ---
         startButton.addEventListener('click', showList);
-        testButton.addEventListener('click', testRecall);
+        goToTestButton.addEventListener('click', goToTest);
+        submitTestButton.addEventListener('click', submitTest);
     </script>
 </body>
 </html>
