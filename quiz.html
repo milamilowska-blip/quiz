@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>DRM – Fałszywe wspomnienia</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    #list { font-size: 20px; margin: 20px; }
+    button { padding: 10px 20px; margin: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Eksperyment DRM</h1>
+  <p>Zapamiętaj słowa, które zobaczysz. Potem spróbuj je przypomnieć.</p>
+  <div id="list"></div>
+  <button onclick="showList()">Start</button>
+  <button onclick="testRecall()">Test przypominania</button>
+  <div id="results"></div>
+
+  <script>
+    const words = ["łóżko","noc","poduszka","drzemka","marzenie","zmęczenie","zasnąć","kołdra","budzik","odpoczynek","sypialnia","koszmar","relaks"];
+    const lure = "sen"; // słowo-klucz, którego nie pokażemy
+    let shown = false;
+
+    function showList() {
+      document.getElementById("list").innerHTML = words.join(", ");
+      shown = true;
+    }
+
+    function testRecall() {
+      if (!shown) return alert("Najpierw obejrzyj listę!");
+      let recall = prompt("Wpisz słowa, które pamiętasz (oddziel przecinkami):");
+      let arr = recall.toLowerCase().split(",");
+      let lureFound = arr.includes(lure);
+      document.getElementById("results").innerHTML =
+        "Zapamiętałeś: " + arr.length + " słów.<br>" +
+        (lureFound ? "Wpisałeś też słowo 'sen', którego nie było!" : "Nie wpisałeś słowa 'sen'.");
+    }
+  </script>
+</body>
+</html>
