@@ -90,6 +90,20 @@
         .red-cell { background-color: #ffe0e0; }
         .green-cell { background-color: #e0ffe0; }
 
+        /* Szczegółowy opis DRM */
+        #explanation-drm {
+            text-align: left;
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px dashed #777;
+            background-color: #f9f9f9;
+            font-size: 16px;
+        }
+        #explanation-drm h3 {
+            color: #34495e;
+            margin-top: 0;
+        }
+        
         /* Stopka */
         footer {
             margin-top: 50px;
@@ -211,57 +225,4 @@
                 resultColor = '#e74c3c';
                 resultMessage = `🚨 **FAŁSZYWE WSPOMNIENIE!** Wpisałeś słowo **'${lure.toUpperCase()}'**, którego **NIE BYŁO** na liście.`;
             } else {
-                resultBg = '#daf2da';
-                resultColor = '#27ae60';
-                resultMessage = `✅ **SUKCES!** Nie wpisałeś słowa '${lure}'. Twoja pamięć uniknęła pułapki DRM.`;
-            }
-            
-            // Tabela z objaśnieniem
-            const explanationTable = `
-                <table id="result-explanation">
-                    <thead>
-                        <tr>
-                            <th>Twój Wynik</th>
-                            <th>Oznacza to...</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="${lureFound ? 'red-cell' : ''}">
-                            <td>**Wpisałeś '${lure.toUpperCase()}'**</td>
-                            <td>**Fałszywe Wspomnienie (Błąd Pamięci)**: Zadziałał Paradygmat DRM, a Twój umysł stworzył wspomnienie na podstawie silnych skojarzeń.</td>
-                        </tr>
-                        <tr class="${!lureFound ? 'green-cell' : ''}">
-                            <td>**Nie wpisałeś '${lure.toUpperCase()}'**</td>
-                            <td>**Trafna Pamięć (Brak Efektu DRM)**: Twoja pamięć była dokładna i uniknęła aktywacji asocjacyjnej, która prowadzi do błędu.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            `;
-
-            resultsDiv.style.backgroundColor = resultBg;
-            resultsDiv.style.color = resultColor;
-            resultsDiv.innerHTML =
-                `<h2>Twój Wynik</h2>` +
-                `Poprawnie zapamiętane słowa: **${correctRecalled} / ${words.length}**<br>` +
-                `Słów ogółem (poprawne + fałszywe): **${arr.length}**<br><br>` +
-                resultMessage +
-                `<br><button id="restartButton">Zacznij od nowa</button>` +
-                explanationTable;
-                
-            submitTestButton.disabled = true; 
-            
-            // Podpięcie funkcji restartu do nowo utworzonego przycisku
-            document.getElementById("restartButton").addEventListener('click', restartExperiment);
-        }
-
-        // --- PODPIĘCIE ZDARZEŃ I INICJALIZACJA ---
-        // Uruchomienie restartExperiment natychmiast po zdefiniowaniu funkcji.
-        restartExperiment();
-        
-        startButton.addEventListener('click', showList);
-        goToTestButton.addEventListener('click', goToTest);
-        submitTestButton.addEventListener('click', submitTest);
-        
-    </script>
-</body>
-</html>
+                resultBg
