@@ -27,7 +27,7 @@
             transition: background-color 0.3s;
         }
         button#restartButton {
-            background-color: #2ecc71; /* Zielony kolor dla restartu */
+            background-color: #2ecc71;
         }
         button#restartButton:hover {
             background-color: #27ae60;
@@ -127,102 +127,4 @@
 
     <div id="recall-phase">
         <h2>Test Przypominania</h2>
-        <p>Wpisz poniżej **tylko** słowa, które pamiętasz, oddzielając je przecinkami (np. słowo1, słowo2, słowo3).</p>
-        <textarea id="recall-input" placeholder="Wpisz zapamiętane słowa..."></textarea>
-        <br>
-        <button id="submitTestButton">Sprawdź wyniki</button>
-    </div>
-    
-    <div id="results"></div>
-
-    <footer>
-        K.Karwańska WSB 2025
-    </footer>
-
-    <script>
-        // Dane eksperymentu
-        const words = ["łóżko", "noc", "poduszka", "drzemka", "marzenie", "zmęczenie", "zasnąć", "kołdra", "budzik", "odpoczynek", "sypialnia", "koszmar", "relaks"];
-        const lure = "sen"; // Critical Lure
-        let shown = false;
-
-        // Pobieranie elementów DOM
-        const listDiv = document.getElementById("list");
-        const resultsDiv = document.getElementById("results");
-        const learningPhase = document.getElementById("learning-phase");
-        const recallPhase = document.getElementById("recall-phase");
-        const startButton = document.getElementById("startButton");
-        const goToTestButton = document.getElementById("goToTestButton");
-        const recallInput = document.getElementById("recall-input");
-        const submitTestButton = document.getElementById("submitTestButton");
-
-        // --- FUNKCJE NAWIGACJI I LOGIKI ---
-
-        // Funkcja resetująca stan eksperymentu
-        function restartExperiment() {
-            shown = false;
-            listDiv.innerHTML = "--- Naciśnij START, aby rozpocząć ---";
-            resultsDiv.innerHTML = "";
-            recallInput.value = "";
-            
-            // Przywrócenie widoczności i stanów przycisków
-            learningPhase.style.display = 'block';
-            recallPhase.style.display = 'none';
-            startButton.disabled = false;
-            goToTestButton.disabled = true;
-            submitTestButton.disabled = false;
-        }
-
-        // 1. Pokaż listę słów
-        function showList() {
-            listDiv.innerHTML = words.join(", ");
-            shown = true;
-            resultsDiv.innerHTML = "Lista pokazana. Zapamiętaj. Następnie przejdź do testu.";
-            startButton.disabled = true;
-            goToTestButton.disabled = false;
-        }
-        
-        // 2. Przełącz na ekran testu i ukryj listę
-        function goToTest() {
-            if (!shown) return alert("Najpierw naciśnij START!");
-            
-            learningPhase.style.display = 'none'; 
-            recallPhase.style.display = 'block'; 
-            resultsDiv.innerHTML = ''; 
-            recallInput.focus(); 
-        }
-
-        // 3. Sprawdzenie wyników
-        function submitTest() {
-            let recall = recallInput.value;
-            
-            if (recall.trim() === "") {
-                resultsDiv.innerHTML = "Nie wpisano żadnych słów. Wpisz je i spróbuj ponownie.";
-                return;
-            }
-            
-            // Przetwarzanie odpowiedzi
-            let arr = recall.toLowerCase().split(',')
-                                        .map(item => item.trim())
-                                        .filter(item => item.length > 0);
-            
-            const lureFound = arr.includes(lure);
-            let correctRecalled = 0;
-            
-            // Liczenie poprawnie przypomnianych słów
-            words.forEach(item => {
-                if (arr.includes(item)) {
-                    correctRecalled++;
-                }
-            });
-
-            // --- TWORZENIE WYNIKÓW I OBJAŚNIENIA ---
-            let resultMessage;
-            let resultColor;
-            let resultBg;
-            
-            if (lureFound) {
-                resultBg = '#f7dbd9';
-                resultColor = '#e74c3c';
-                resultMessage = `🚨 **FAŁSZYWE WSPOMNIENIE!** Wpisałeś słowo **'${lure.toUpperCase()}'**, którego **NIE BYŁO** na liście.`;
-            } else {
-                resultBg
+        <p>Wpisz poniżej **tylko** słowa, które pamiętasz, oddzielając je przecinkami (np. sł
