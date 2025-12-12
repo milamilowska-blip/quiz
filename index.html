@@ -60,7 +60,7 @@
         #recall-phase {
             padding: 20px;
             border: 2px solid #e74c3c;
-            display: none; 
+            display: none; /* Domyślnie ukryty */
         }
         #recall-input {
             width: 90%;
@@ -71,24 +71,6 @@
             box-sizing: border-box;
             resize: vertical;
         }
-
-        /* Tabela z objaśnieniem wyników */
-        #result-explanation {
-            margin-top: 30px;
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 16px;
-        }
-        #result-explanation th, #result-explanation td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: center;
-        }
-        #result-explanation th {
-            background-color: #f2f2f2;
-        }
-        .red-cell { background-color: #ffe0e0; }
-        .green-cell { background-color: #e0ffe0; }
 
         /* Stopka */
         footer {
@@ -126,7 +108,7 @@
     </footer>
 
     <script>
-        // Dane eksperymentu (jeden zestaw)
+        // Dane eksperymentu
         const words = ["łóżko", "noc", "poduszka", "drzemka", "marzenie", "zmęczenie", "zasnąć", "kołdra", "budzik", "odpoczynek", "sypialnia", "koszmar", "relaks"];
         const lure = "sen"; // Critical Lure
         let shown = false;
@@ -141,7 +123,7 @@
         const recallInput = document.getElementById("recall-input");
         const submitTestButton = document.getElementById("submitTestButton");
 
-        // --- FUNKCJE NAWIGACJI I LOGIKI ---
+        // --- FUNKCJE NAWIGACJI ---
 
         // Funkcja resetująca stan eksperymentu
         function restartExperiment() {
@@ -171,10 +153,10 @@
         function goToTest() {
             if (!shown) return alert("Najpierw naciśnij START!");
             
-            learningPhase.style.display = 'none'; 
-            recallPhase.style.display = 'block'; 
-            resultsDiv.innerHTML = ''; 
-            recallInput.focus(); 
+            learningPhase.style.display = 'none'; // Ukrywamy ekran nauki
+            recallPhase.style.display = 'block'; // Pokazujemy ekran testu
+            resultsDiv.innerHTML = ''; // Czyścimy komunikat
+            recallInput.focus(); // Ustawienie kursora w polu tekstowym
         }
 
         // 3. Sprawdzenie wyników
@@ -191,58 +173,51 @@
                                         .map(item => item.trim())
                                         .filter(item => item.length > 0);
             
-            const lureFound = arr.includes(lure);
+            let lureFound = arr.includes(lure);
             let correctRecalled = 0;
             
             // Liczenie poprawnie przypomnianych słów
-            words.forEach(item => {
-                if (arr.includes(item)) {
+            arr.forEach(item => {
+                if (words.includes(item)) {
                     correctRecalled++;
                 }
             });
 
-            // --- TWORZENIE WYNIKÓW I OBJAŚNIENIA ---
+            // Wyświetlenie wyników
             let resultMessage;
-            let resultColor;
-            let resultBg;
             
             if (lureFound) {
-                resultBg = '#f7dbd9';
-                resultColor = '#e74c3c';
-                resultMessage = `🚨 **FAŁSZYWE WSPOMNIENIE!** Wpisałeś słowo **'${lure.toUpperCase()}'**, którego **NIE BYŁO** na liście.`;
+                 // Czerwony komunikat: błąd pamięci (fałszywe wspomnienie)
+                resultsDiv.style.backgroundColor = '#f7dbd9';
+                resultsDiv.style.color = '#e74c3c';
+                resultMessage = "🚨 **FAŁSZYWE WSPOMNIENIE!** Wpisałeś słowo 'sen', którego **NIE BYŁO** na liście.";
             } else {
-                resultBg = '#daf2da';
-                resultColor = '#27ae60';
-                resultMessage = `✅ **SUKCES!** Nie wpisałeś słowa '${lure}'. Twoja pamięć uniknęła pułapki DRM.`;
+                 // Zielony komunikat: sukces eksperymentalny (brak fałszywego wspomnienia)
+                resultsDiv.style.backgroundColor = '#daf2da';
+                resultsDiv.style.color = '#27ae60';
+                resultMessage = "✅ **SUKCES!** Nie wpisałeś słowa 'sen'. Twoja pamięć uniknęła pułapki DRM.";
             }
             
-            // Tabela z objaśnieniem (na podstawie wczesniejszej tabeli)
-            const explanationTable = `
-                <table id="result-explanation">
-                    <thead>
-                        <tr>
-                            <th>Twój Wynik</th>
-                            <th>Oznacza to...</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="${lureFound ? 'red-cell' : ''}">
-                            <td>**Wpisałeś '${lure.toUpperCase()}'**</td>
-                            <td>**Fałszywe Wspomnienie (Błąd Pamięci)**: Zadziałał Paradygmat DRM, a Twój umysł stworzył wspomnienie na podstawie silnych skojarzeń.</td>
-                        </tr>
-                        <tr class="${!lureFound ? 'green-cell' : ''}">
-                            <td>**Nie wpisałeś '${lure.toUpperCase()}'**</td>
-                            <td>**Trafna Pamięć (Brak Efektu DRM)**: Twoja pamięć była dokładna i uniknęła aktywacji asocjacyjnej, która prowadzi do błędu.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            `;
-
-            resultsDiv.style.backgroundColor = resultBg;
-            resultsDiv.style.color = resultColor;
             resultsDiv.innerHTML =
                 `<h2>Twój Wynik</h2>` +
                 `Poprawnie zapamiętane słowa: **${correctRecalled} / ${words.length}**<br>` +
                 `Słów ogółem (poprawne + fałszywe): **${arr.length}**<br><br>` +
                 resultMessage +
-                `<br><button id="restartButton">Zacznij od nowa</button>` +
+                `<br><button id="restartButton">Zacznij od nowa</button>`;
+                
+            submitTestButton.disabled = true; // Test przeprowadzony
+            
+            // Podpięcie funkcji restartu do nowo utworzonego przycisku
+            document.getElementById("restartButton").addEventListener('click', restartExperiment);
+        }
+
+        // --- PODPIĘCIE ZDARZEŃ ---
+        startButton.addEventListener('click', showList);
+        goToTestButton.addEventListener('click', goToTest);
+        submitTestButton.addEventListener('click', submitTest);
+        
+        // Zapewnienie, że przyciski są początkowo poprawnie ukryte
+        window.onload = restartExperiment;
+    </script>
+</body>
+</html>
