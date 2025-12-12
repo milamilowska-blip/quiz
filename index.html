@@ -127,4 +127,176 @@
 
     <div id="recall-phase">
         <h2>Test Przypominania</h2>
-        <p>Wpisz poniżej **tylko** słowa, które pamiętasz, oddzielając je przecinkami (np. sł
+        <p>Wpisz poniżej **tylko** słowa, które pamiętasz, oddzielając je przecinkami (np. słowo1, słowo2, słowo3).</p>
+        <textarea id="recall-input" placeholder="Wpisz zapamiętane słowa..."></textarea>
+        <br>
+        <button id="submitTestButton">Sprawdź wyniki</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <footer>
+        K.Karwańska WSB 2025
+    </footer>
+
+    <script>
+        // UWAGA: CAŁY KOD JEST OPAKOWANY W BLOK, KTÓRY GWARANTUJE, 
+        // ŻE JS URUCHOMI SIĘ DOPIERO PO ZAŁADOWANIU WSZYSTKICH ELEMENTÓW HTML (DOM).
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Dane eksperymentu
+            const words = ["łóżko", "noc", "poduszka", "drzemka", "marzenie", "zmęczenie", "zasnąć", "kołdra", "budzik", "odpoczynek", "sypialnia", "koszmar", "relaks"];
+            const lure = "sen"; // Critical Lure
+            let shown = false;
+
+            // Pobieranie elementów DOM (teraz bezpieczne)
+            const listDiv = document.getElementById("list");
+            const resultsDiv = document.getElementById("results");
+            const learningPhase = document.getElementById("learning-phase");
+            const recallPhase = document.getElementById("recall-phase");
+            const startButton = document.getElementById("startButton");
+            const goToTestButton = document.getElementById("goToTestButton");
+            const recallInput = document.getElementById("recall-input");
+            const submitTestButton = document.getElementById("submitTestButton");
+
+            // --- FUNKCJE NAWIGACJI I LOGIKI ---
+
+            // Funkcja resetująca stan eksperymentu
+            function restartExperiment() {
+                shown = false;
+                listDiv.innerHTML = "--- Naciśnij START, aby rozpocząć ---";
+                resultsDiv.innerHTML = "";
+                recallInput.value = "";
+                
+                // Przywrócenie widoczności i stanów przycisków
+                learningPhase.style.display = 'block';
+                recallPhase.style.display = 'none';
+                startButton.disabled = false;
+                goToTestButton.disabled = true; // ZDEZAKTYWOWANY na początku
+                submitTestButton.disabled = false;
+            }
+
+            // 1. Pokaż listę słów
+            function showList() {
+                listDiv.innerHTML = words.join(", ");
+                shown = true;
+                resultsDiv.innerHTML = "Lista pokazana. Zapamiętaj. Następnie przejdź do testu.";
+                startButton.disabled = true;
+                goToTestButton.disabled = false; // AKTYWOWANY PO POKAZANIU LISTY
+            }
+            
+            // 2. Przełącz na ekran testu i ukryj listę
+            function goToTest() {
+                if (!shown) return alert("Najpierw naciśnij START!");
+                
+                learningPhase.style.display = 'none'; 
+                recallPhase.style.display = 'block'; 
+                resultsDiv.innerHTML = ''; 
+                recallInput.focus(); 
+            }
+
+            // 3. Sprawdzenie wyników
+            function submitTest() {
+                let recall = recallInput.value;
+                
+                if (recall.trim() === "") {
+                    resultsDiv.innerHTML = "Nie wpisano żadnych słów. Wpisz je i spróbuj ponownie.";
+                    return;
+                }
+                
+                // Przetwarzanie odpowiedzi
+                let arr = recall.toLowerCase().split(',')
+                                            .map(item => item.trim())
+                                            .filter(item => item.length > 0);
+                
+                const lureFound = arr.includes(lure);
+                let correctRecalled = 0;
+                
+                // Liczenie poprawnie przypomnianych słów
+                words.forEach(item => {
+                    if (arr.includes(item)) {
+                        correctRecalled++;
+                    }
+                });
+
+                // --- TWORZENIE WYNIKÓW I OBJAŚNIENIA ---
+                let resultMessage;
+                let resultColor;
+                let resultBg;
+                
+                if (lureFound) {
+                    resultBg = '#f7dbd9';
+                    resultColor = '#e74c3c';
+                    resultMessage = `🚨 **FAŁSZYWE WSPOMNIENIE!** Wpisałeś słowo **'${lure.toUpperCase()}'**, którego **NIE BYŁO** na liście.`;
+                } else {
+                    resultBg = '#daf2da';
+                    resultColor = '#27ae60';
+                    resultMessage = `✅ **SUKCES!** Nie wpisałeś słowa '${lure}'. Twoja pamięć uniknęła pułapki DRM.`;
+                }
+                
+                // Tabela z objaśnieniem (co oznacza wynik)
+                const explanationTable = `
+                    <table id="result-explanation">
+                        <thead>
+                            <tr>
+                                <th>Twój Wynik</th>
+                                <th>Oznacza to...</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="${lureFound ? 'red-cell' : ''}">
+                                <td>**Wpisałeś '${lure.toUpperCase()}'**</td>
+                                <td>**Fałszywe Wspomnienie (Błąd Pamięci)**: Zadziałał Paradygmat DRM, a Twój umysł stworzył wspomnienie na podstawie silnych skojarzeń.</td>
+                            </tr>
+                            <tr class="${!lureFound ? 'green-cell' : ''}">
+                                <td>**Nie wpisałeś '${lure.toUpperCase()}'**</td>
+                                <td>**Trafna Pamięć (Brak Efektu DRM)**: Twoja pamięć była dokładna i uniknęła aktywacji asocjacyjnej, która prowadzi do błędu.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `;
+
+                // Szczegółowy opis mechanizmu DRM
+                const explanationDRM = `
+                    <div id="explanation-drm">
+                        <h3>Jak działa Paradygmat DRM?</h3>
+                        <p>Właśnie doświadczyłeś **Paradygmatu Deese’a-Roedigera-McDermotta (DRM)**.</p>
+                        <p>Lista, którą zapamiętywałeś, składała się ze słów silnie powiązanych tematycznie ze słowem-kluczem ('${lure.toUpperCase()}'), które celowo zostało pominięte.</p>
+                        <ul>
+                            <li>**Aktywacja Semantyczna:** Zapamiętywanie słów (np. 'łóżko', 'poduszka') automatycznie aktywuje w Twoim umyśle całą sieć pojęć związanych ze **snem**.</li>
+                            <li>**Błąd Źródła (Fałszywe Wspomnienie):** Ten aktywowany termin jest tak silnie obecny w pamięci, że Twój mózg **mylnie przypisuje mu źródło:** uznajesz, że widziałeś je na liście, mimo że go tam nie było.</li>
+                        </ul>
+                        <p>To pokazuje, że pamięć ludzka nie jest wiernym nagraniem, lecz aktywnym procesem **konstrukcyjnym** i jest podatna na błędy asocjacyjne.</p>
+                    </div>
+                `;
+
+
+                resultsDiv.style.backgroundColor = resultBg;
+                resultsDiv.style.color = resultColor;
+                resultsDiv.innerHTML =
+                    `<h2>Twój Wynik</h2>` +
+                    `Poprawnie zapamiętane słowa: **${correctRecalled} / ${words.length}**<br>` +
+                    `Słów ogółem (poprawne + fałszywe): **${arr.length}**<br><br>` +
+                    resultMessage +
+                    `<br><button id="restartButton">Zacznij od nowa</button>` +
+                    explanationTable +
+                    explanationDRM; 
+                
+                submitTestButton.disabled = true; 
+                
+                // Podpięcie funkcji restartu do nowo utworzonego przycisku
+                document.getElementById("restartButton").addEventListener('click', restartExperiment);
+            }
+
+            // --- PODPIĘCIE ZDARZEŃ I INICJALIZACJA ---
+            
+            // Inicjalizacja: Uruchomienie restartExperiment po załadowaniu DOM.
+            restartExperiment();
+            
+            // Podpięcie listenerów po załadowaniu DOM
+            startButton.addEventListener('click', showList);
+            goToTestButton.addEventListener('click', goToTest);
+            submitTestButton.addEventListener('click', submitTest);
+        });
+    </script>
+</body>
+</html>
